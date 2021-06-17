@@ -1,0 +1,110 @@
+
+##
+# (c) 2021 - CloudopsWorks OÜ - https://docs.cloudops.works/
+#
+name: Docker Build - Non Kubernetes
+on:
+  # Run only on branches PUSH except when charts are modified
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - ".github/workflows/**"
+  workflow_dispatch:
+    
+# Permission Settings for the entire RUN
+permissions:
+  contents: write
+  packages: write
+  statuses: write
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    outputs:
+      release_version: ${{ steps.release.outputs.release_version }}
+    steps:
+      # Proceed with checkout of source with all the references (depth=0)  
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.BOT_TOKEN }}
+      # Setup Node JS for builds
+      - name: Set Node 12
+        uses: actions/setup-node@v2
+        with:
+          node-version: "12"
+      # Cache all npm packages
+      - name: Cache NPM packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+          # Get the owner repo
+      - name: Get owner
+        id: getowner
+        run: |
+          repo_owner=`echo "$GITHUB_REPOSITORY" | cut -f 1 -d "/"`
+          repo_name=`echo "$GITHUB_REPOSITORY" | cut -f 2 -d "/"`
+          echo "::set-output name=owner::$repo_owner"
+          echo "::set-output name=repo_name::$repo_name"
+      # Get previous tags in order to proceed to generate next version
+      - name: Get Previous tag
+        uses: WyriHaximus/github-action-get-previous-tag@v1
+        id: previoustag
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      # Generate next SEMVER number
+      - name: Next Semver
+        uses: WyriHaximus/github-action-next-semvers@v1
+        id: semvers
+        with:
+          version: "${{ steps.previoustag.outputs.tag }}"
+      # Create a VERSION file to use through the build
+      - name: Set Version File
+        id: release
+        env:
+          NEXT_VERSION: "${{ steps.semvers.outputs.patch }}"
+        run: |
+          echo -n "$NEXT_VERSION" > VERSION
+          echo "::set-output name=release_version::$NEXT_VERSION"
+      # Node JS Versioning SET
+      - name: NodeJS Version
+        run: npm version $(cat VERSION) --git-tag-version=false --commit-hooks=false
+      # Push the changes to Git TAG before deploying anything
+      - name: Release Version
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+        run: |
+          VERSION=$(cat VERSION)
+          git config --global user.name "finconecta-bot"
+          git config --global user.email "finconecta-bot@4wrd.online"
+          git commit -a -m "chore: release version v$VERSION"
+          git tag -fa v$VERSION -m "Release Version v$VERSION"
+          git push origin v$VERSION
+      #TODO: Build a Zip Package with release and attach as Artifact for the release.
+      #- name: Build Package Version
+      #  run: make release
+
+      #
+      # Docker Build and deploy to registry
+      #
+      - name: Docker Login
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ secrets.DOCKER_REGISTRY_ADDRESS }}
+          username: ${{ secrets.AZURE_SERVICE_ID }}
+          password: ${{ secrets.AZURE_SERVICE_SECRET }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Docker Push
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          context: .
+          tags: |
+            ${{ secrets.DOCKER_REGISTRY_ADDRESS }}/${{ steps.getowner.outputs.owner }}/${{ steps.getowner.outputs.repo_name }}:latest
+            ${{ secrets.DOCKER_REGISTRY_ADDRESS }}/${{ steps.getowner.outputs.owner }}/${{ steps.getowner.outputs.repo_name }}:${{ steps.release.outputs.release_version }}
