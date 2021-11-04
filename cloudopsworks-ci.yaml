@@ -3,10 +3,5 @@
 #
 pipeline:
   - docker
-  - helm
-  - zip
-zipGlobs:
-  - target/*with-dependencies.jar
-  - conf/**
 cd:
   env: dev
