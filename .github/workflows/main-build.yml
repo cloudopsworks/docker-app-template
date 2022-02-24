@@ -80,8 +80,8 @@ jobs:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
           VERSION=$(cat VERSION)
-          git config --global user.name "finconecta-bot"
-          git config --global user.email "finconecta-bot@4wrd.online"
+          git config --global user.name "${{ secrets.BOT_USER }}"
+          git config --global user.email "${{ secrets.BOT_MAIL }}"
           git commit -a -m "chore: release version v$VERSION"
           git tag -fa v$VERSION -m "Release Version v$VERSION"
           git push origin v$VERSION
