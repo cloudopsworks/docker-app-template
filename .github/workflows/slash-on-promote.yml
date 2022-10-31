@@ -82,7 +82,7 @@ jobs:
 
       # Comment issue that started this event
       - name: Comment the Issue
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         env:
           EVENT_REPO: "${{ steps.getowner.outputs.owner }}/environment-${{ steps.getowner.outputs.owner }}-${{ github.event.client_payload.slash_command.args.named.env }}"
           EVENT_PAYLOAD: '${{ steps.params.output.payload }}'
@@ -99,7 +99,7 @@ jobs:
             \`\`\`
             `
 
-            github.issues.createComment({
+            github.rest.issues.createComment({
               owner: repository_owner,
               repo: repository,
               issue_number: issue_number,

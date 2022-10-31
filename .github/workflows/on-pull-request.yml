@@ -55,12 +55,12 @@ jobs:
           fi
           echo "::set-output name=autoapprove::$is_auto"
 
-      - uses: actions/github-script@v4
+      - uses: actions/github-script@v6
         if: ${{ steps.check_automatic.outputs.autoapprove == 'true' }}
         with:
           github-token: ${{secrets.BOT_TOKEN}}
           script: |
-            github.issues.addLabels({
+            github.rest.issues.addLabels({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -76,7 +76,7 @@ jobs:
           echo "::set-output name=count::$count"
           echo "::set-output name=as_json::$reviewers_as_json"
 
-      - uses: actions/github-script@v4
+      - uses: actions/github-script@v6
         if: ${{ steps.check_automatic.outputs.autoapprove != 'true' }}
         with:
           github-token: ${{secrets.BOT_TOKEN}}
@@ -84,14 +84,14 @@ jobs:
             const reviewers_json=JSON.parse('${{ steps.reviewers.outputs.as_json }}')
             const reviewers_count=${{ steps.reviewers.outputs.count }}
 
-            github.pulls.requestReviewers({
+            github.rest.pulls.requestReviewers({
               pull_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               reviewers: reviewers_json
             })
 
-            github.issues.addLabels({
+            github.rest.issues.addLabels({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,

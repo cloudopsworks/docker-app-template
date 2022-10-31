@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: Slash Command Dispatch
         if: ${{ !github.event.issue.pull_request }}
-        uses: peter-evans/slash-command-dispatch@v2
+        uses: peter-evans/slash-command-dispatch@v3
         with:
           token: ${{ secrets.BOT_TOKEN }}
           commands: |
@@ -35,7 +35,7 @@ jobs:
             issue_repository=${{ github.repository }}
       - name: Slash Command Dispatch Pull-Request
         if: ${{ github.event.issue.pull_request }}
-        uses: peter-evans/slash-command-dispatch@v2
+        uses: peter-evans/slash-command-dispatch@v3
         with:
           token: ${{ secrets.BOT_TOKEN }}
           commands: |
