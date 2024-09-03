@@ -43,16 +43,16 @@ jobs:
         id: node_version
         uses: mikefarah/yq@master
         with:
-          cmd: yq eval '.build.node.version // "18"' ./cloudopsworks-ci.yaml
+          cmd: yq eval '.build.node.version // "20"' ./.github/cloudopsworks-ci.yaml
       # Get pipeline conf node dist
       - name: Get pipeline node dist
         id: node_dist
         uses: mikefarah/yq@master
         with:
-          cmd: yq eval '.build.node.dist // "adopt"' ./cloudopsworks-ci.yaml
+          cmd: yq eval '.build.node.dist // "adopt"' ./.github/cloudopsworks-ci.yaml
       # Setup Node JS for builds with version provided
       - name: Set Node Version
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "${{ steps.node_version.outputs.result }}"
           check-latest: true
@@ -60,7 +60,7 @@ jobs:
 
       # Cache all NPM packages
       - name: Cache NPM packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -76,6 +76,13 @@ jobs:
           echo "owner=$repo_owner" >> $GITHUB_OUTPUT
           echo "repo_name=$repo_name" >> $GITHUB_OUTPUT
 
+      # Get Package Name from package.json
+      - name: Get package Name
+        id: package_name
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq e -oj -r '.name' package.json
+
       # Versioning SET
       - name: Version SET
         run: make version
@@ -84,10 +91,3 @@ jobs:
         id: semver
         run: |
           echo "version=$(cat VERSION)" >> $GITHUB_OUTPUT
-
-      # Get Package Name from package.json
-      - name: Get package Name
-        id: package_name
-        uses: mikefarah/yq@master
-        with:
-          cmd: yq e -oj -r '.name' package.json
