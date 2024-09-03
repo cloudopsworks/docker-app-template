@@ -8,6 +8,16 @@ name: Code Build Workflow Template
 on:
   workflow_call:
     inputs:
+      buildEnvironment:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+      targetName:
+        required: false
+        type: string
+        default: ''
       isRelease:
         required: true
         type: boolean
@@ -29,6 +39,10 @@ on:
       AWS_REGION:
         required: true
         type: string
+      AWS_STS_ROLE_ARN:
+        required: false
+        type: string
+        default: ""
 
     secrets:
       BOT_TOKEN:
@@ -92,22 +106,22 @@ jobs:
         id: node_version
         uses: mikefarah/yq@master
         with:
-          cmd: yq eval '.build.node.version // "18"' ./cloudopsworks-ci.yaml
+          cmd: yq eval '.build.node.version // "20"' ./.github/cloudopsworks-ci.yaml
       # Get pipeline conf node dist
       - name: Get pipeline node dist
         id: node_dist
         uses: mikefarah/yq@master
         with:
-          cmd: yq eval '.build.node.dist // "adopt"' ./cloudopsworks-ci.yaml
+          cmd: yq eval '.build.node.dist // "adopt"' ./.github/cloudopsworks-ci.yaml
       # Setup Node JS for builds with version provided
       - name: Set Node Version
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "${{ steps.node_version.outputs.result }}"
           check-latest: true
           token: ${{ secrets.BOT_TOKEN }}
       # Helm Chart build & deploy Support
-      - uses: azure/setup-helm@v3
+      - uses: azure/setup-helm@v4
         with:
           version: 'latest'
           token: ${{ secrets.BOT_TOKEN }}
@@ -125,7 +139,7 @@ jobs:
         id: pipeline_docker
         uses: mikefarah/yq@master
         with:
-          cmd: yq e '.pipeline[]' ./cloudopsworks-ci.yaml | grep docker | wc -l | tr -d " "
+          cmd: yq e '.pipeline[]' ./.github/cloudopsworks-ci.yaml | grep docker | wc -l | tr -d " "
 
 
       # Get the owner repo
@@ -151,8 +165,8 @@ jobs:
       - name: Docker Login Azure
         env:
           TARGET: ${{ inputs.TARGET_CLOUD }}
-        if: ${{ steps.pipeline_docker.outputs.result == 1 && env.TARGET == 'AZ' }}
-        uses: docker/login-action@v2
+        if: ${{ steps.pipeline_docker.outputs.result == 1 && env.TARGET == 'AZURE' }}
+        uses: docker/login-action@v3
         with:
           registry: ${{ inputs.DOCKER_REGISTRY_ADDRESS }}
           username: ${{ secrets.AZURE_SERVICE_ID }}
@@ -160,27 +174,39 @@ jobs:
       #
       # Docker Build login AWS
       - name: Configure AWS Credentials
-        if: ${{ steps.pipeline_docker.outputs.result == 1 && inputs.TARGET_CLOUD == 'AWS' }}
+        if: ${{ steps.pipeline_docker.outputs.result == 1 && inputs.TARGET_CLOUD == 'AWS' && inputs.AWS_STS_ROLE_ARN == '' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ inputs.AWS_REGION }}
 
+      #
+      # Docker Build login AWS - w/Assume Role
+      - name: Configure AWS Credentials with Assume Role
+        if: ${{ steps.pipeline_docker.outputs.result == 1 && inputs.TARGET_CLOUD == 'AWS' && inputs.AWS_STS_ROLE_ARN != '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ inputs.AWS_STS_ROLE_ARN }}
+          role-session-name: ${{ steps.getowner.outputs.repo_name }}-build
+          aws-region: ${{ inputs.AWS_REGION }}
+
       - name: Docker Login AWS
         if: ${{ steps.pipeline_docker.outputs.result == 1 && inputs.TARGET_CLOUD == 'AWS' }}
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ${{ inputs.DOCKER_REGISTRY_ADDRESS }}
       #
       # Build-X run
       - name: Set up Docker Buildx
         if: steps.pipeline_docker.outputs.result == 1
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       # Push docker version latest release
       - name: Docker Push Release
         if: steps.pipeline_docker.outputs.result == 1 && inputs.isRelease
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           push: true
           context: .
@@ -190,7 +216,7 @@ jobs:
       # Push docker version but is not latest release
       - name: Docker Push Non-Release
         if: steps.pipeline_docker.outputs.result == 1 && ! inputs.isRelease
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           push: true
           context: .

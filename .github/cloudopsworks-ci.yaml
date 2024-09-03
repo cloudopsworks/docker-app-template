@@ -5,7 +5,10 @@
 #
 pipeline:
   - docker
-staticAnalysis: true
+zipGlobs:
+  - node_modules/**
+  - ./**
+  - .env
 excludeGlobs:
   - Dockerfile
   - .helmignore
@@ -44,32 +47,31 @@ config:
   requiredReviewers: 1
 
   # Required: needed if not automatic or protection is true
-  reviewers:
-    - finconecta
-    - berahac
-    - finconecta-bot
-    - suchostone
-    - duilioizzi-finconecta
+  reviewers: []
+  #  - elasticguru-bot
+  #  - cloudopsworks-dev
+  #  - cloudopsworks/engineering
 
   # Required: needed for permit owners to perform commits under protected branches.
   # Teams are specified as org/team-name
-  owners:
-    - berahac
-    - duilioizzi-finconecta
-    - finconecta-team/dev-ops
+  owners: []
+  #  - elasticguru-bot
+  #  - cloudopsworks-dev
+  #  - cloudopsworks/admin
 
   # Optional configure the repository members
   contributors:
     admin:
-      - finconecta-team/dev-ops
+      - cloudopsworks/admin
+      - cloudopsworks-bot
     triage: []
     pull: []
     push:
-      - finconecta-team/frontend-devs
+      - cloudopsworks/engineering
     maintain: []
 
 #
-## Default node version is 14, uncomment to build with different
+## Default node version is 20, uncomment to build with different
 # build:
 #   node:
 #     version: 12
@@ -88,8 +90,12 @@ config:
 
 ## CD pipeline configuration uncomment and configure accordingly to enable
 cd:
-  # Indicate that the environment makes automatic merges and deploys
-  automatic: false
+  # Target Cloud
+  cloud: aws | azure | gcp
+  # Indicate that the environment makes automatic merges and deploys on lower environments
+  automatic: true
+  # Indicate the Runner that will be used for the deployment - usually will be a hosted runner
+  # runner_set: "arc-runner-set"
 
   # These deployment environments are fixed by the GitFlow workflow
   # targetName are optional for most deployments but are required for support branches.
@@ -106,21 +112,43 @@ cd:
   # Previews are run on pull requests from hotfix/** or feature/** branches into any of the development / main branches
   deployments:
     develop:
+      #variables:
+      #  var1: value1
+      #  var2: value2
+      # Sample variables to deploy into different account
+      #  DEPLOYMENT_AWS_REGION: us-east-1
+      #  DEPLOYMENT_STS_ROLE_ARN: arn:aws:iam::123456789012:role/TerraformAccessRole
+      #legacyDeliveryPush: true
       #enabled: false
       env: dev
       #targetName: dev-target
     release:
+      #variables:
+      #  var1: value1
+      #  var2: value2
+      #reviewers: false # defaults to true
+      #legacyDeliveryPush: true
       env: production
       #targetName: prod-target
       targets:
         my-target:
           env: prod-my-target
           targetName: prod-my-target
+          #legacyDeliveryPush: true
     test:
+      #variables:
+      #  var1: value1
+      #  var2: value2
       #enabled: false
+      #legacyDeliveryPush: true
       env: uat
       #targetName: uat-target
     prerelease:
+      #variables:
+      #  var1: value1
+      #  var2: value2
+      #reviewers: false # defaults to true
+      #legacyDeliveryPush: true
       #enabled: false
       env: demo
       #targetName: demo-target
@@ -128,20 +156,7 @@ cd:
         my-target:
           env: demo-my-target
           targetName: demo-my-target
+          #legacyDeliveryPush: true
     hotfix:
       env: hotfix
       #targetName: hotfix-target
-    pull_request:
-      env: pull_request
-      #targetName: pr-target
-    support:
-      - match: 1.5.*
-        env: demo
-        targetName: demo
-      - match: 1.3.*
-        env: demo2
-        targetName: demo2
-  preview:
-    enabled: false
-    kubernetes: true
-    domain: example.com
