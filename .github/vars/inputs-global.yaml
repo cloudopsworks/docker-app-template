@@ -2,11 +2,25 @@ organization_name: "ORG_NAME"
 organization_unit: "ORG_UNIT"
 environment_name: "ENV_NAME"
 repository_owner: "REPO_OWNER" # Required
-#api_files_dir: "relative-path-to-apidefs"
-# Optional Additional ENV variables
-#node_extra_env: |
-#  ENV_VAR1=value1
-#  ENV_VAR2=value2
-#custom_install_command: npm install
-#custom_build_command: npm run build
-#node_build_dir: ./build
+#
+## Default image version is "node:18-alpine" and default run command is npm run start
+## modify docker_image and docker_inline parameters to match the proper configuration needed
+#docker_image: docker/image:version-xxx
+#
+# Dockerfile Inline content that will be merged into the Dockerfile
+#docker_inline: |
+#  # Dockerfile content here
+#  # Example:
+#  # WORKDIR /app
+#  # COPY package*.json ./
+#  # COPY ./mydir ./my dest
+#
+# Docker Arguments that will be passed to Docker Build Process
+#docker_args: |
+#  ARG1=value1
+#  ARG2=value2
+#  ARG3=value3
+#
+# Custom command that will be placed as startup script in dockerfile
+#custom_run_command: npm run start
+#
