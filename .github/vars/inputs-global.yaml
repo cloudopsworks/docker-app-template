@@ -11,9 +11,11 @@ repository_owner: "REPO_OWNER" # Required
 #docker_inline: |
 #  # Dockerfile content here
 #  # Example:
+#  # FROM node:14-alpine as test
 #  # WORKDIR /app
 #  # COPY package*.json ./
-#  # COPY ./mydir ./my dest
+#  # FROM customized # customized stage is required to get back to the original stage to copy files
+#  # COPY --from test ./mydir ./my dest
 #
 # Docker Arguments that will be passed to Docker Build Process
 #docker_args: |
