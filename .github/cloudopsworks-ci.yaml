@@ -1,5 +1,5 @@
 ##
-# (c) 2021 - Cloud Ops Works LLC - https://cloudops.works/
+# (c) 2024 - Cloud Ops Works LLC - https://cloudops.works/
 #            On GitHub: https://github.com/cloudopsworks
 #            Distributed Under Apache v2.0 License
 #
@@ -70,30 +70,12 @@ config:
       - cloudopsworks/engineering
     maintain: []
 
-#
-## Default node version is 20, uncomment to build with different
-# build:
-#   node:
-#     version: 12
-#     dist: adopt
-#
-#   # Set Sonarqube processing to false if want to disable, the tool is enabled by default
-#   sonarqube:
-#     enabled: false
-#   # Set DependencyTrack processing to false if want to disable, the tool is enabled by default
-#   # type: is one of => Library , Application , Container , Framework , Device , Firmware , File , Operating System
-#   #       Default type is Library
-#   dependencyTrack:
-#     enabled: false
-#     type: Library
-#
-
 ## CD pipeline configuration uncomment and configure accordingly to enable
 cd:
   # Target Cloud
   cloud: aws | azure | gcp
   # Indicate that the environment makes automatic merges and deploys on lower environments
-  automatic: true
+  automatic: false
   # Indicate the Runner that will be used for the deployment - usually will be a hosted runner
   # runner_set: "arc-runner-set"
 
@@ -128,13 +110,13 @@ cd:
       #  var2: value2
       #reviewers: false # defaults to true
       #legacyDeliveryPush: true
-      env: production
+      env: prod
       #targetName: prod-target
-      targets:
-        my-target:
-          env: prod-my-target
-          targetName: prod-my-target
-          #legacyDeliveryPush: true
+#      targets:
+#        my-target:
+#          env: prod-my-target
+#          targetName: prod-my-target
+#          #legacyDeliveryPush: true
     test:
       #variables:
       #  var1: value1
@@ -152,11 +134,11 @@ cd:
       #enabled: false
       env: demo
       #targetName: demo-target
-      targets:
-        my-target:
-          env: demo-my-target
-          targetName: demo-my-target
-          #legacyDeliveryPush: true
+#      targets:
+#        my-target:
+#          env: demo-my-target
+#          targetName: demo-my-target
+#          #legacyDeliveryPush: true
     hotfix:
       env: hotfix
       #targetName: hotfix-target
