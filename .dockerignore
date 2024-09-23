@@ -19,3 +19,4 @@ sonar-project.properties
 # CloudOpsWorks Tronador
 tronador/
 .tronador
+Makefile
