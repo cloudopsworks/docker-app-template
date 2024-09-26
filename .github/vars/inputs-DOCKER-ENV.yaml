@@ -8,3 +8,16 @@ container_registry: REGISTRY
 #  ARG1=value1
 #  ARG2=value2
 #  ARG3=value3
+
+# The following are for cloud specific configurations
+# For Azure:
+#azure:
+#  TBD
+#
+# For AWS
+#aws:
+#  region: AWS_REGION
+#
+# For GCP
+#gcp:
+#  TBD
