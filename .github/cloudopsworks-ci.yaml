@@ -73,8 +73,6 @@ config:
 
 ## CD pipeline configuration uncomment and configure accordingly to enable
 cd:
-  # Target Cloud
-  cloud: aws | azure | gcp
   # Indicate that the environment makes automatic merges and deploys on lower environments
   automatic: false
   # Indicate the Runner that will be used for the deployment - usually will be a hosted runner
