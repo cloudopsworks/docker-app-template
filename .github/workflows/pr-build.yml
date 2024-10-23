@@ -79,6 +79,13 @@ jobs:
         id: config
         uses: ./bp/ci/config
 
+      - name: Build Docker
+        id: build
+        uses: ./bp/ci/docker/build
+        with:
+          bot_user: ${{ vars.BOT_USER }}
+          token: ${{ secrets.BOT_TOKEN }}
+
       - name: Build & Save Container
         uses: ./bp/ci/nodejs/container
         with:
