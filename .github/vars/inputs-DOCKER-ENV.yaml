@@ -1,6 +1,7 @@
 environment: "dev|uat|prod|demo"
 # This file contains the environment variables for the Kubernetes deployment
 runner_set: "RUNNER-ENV"
+#disable_deploy: true
 container_registry: REGISTRY
 #
 # Docker Arguments that will be passed to Docker Build Process
