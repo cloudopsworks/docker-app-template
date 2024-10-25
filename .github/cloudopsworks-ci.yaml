@@ -23,6 +23,7 @@ excludeGlobs:
   - gulpfile*
   - tronador/*
   - .tronador
+  - Makefile
 
 
 # Repo & CD Configurations
