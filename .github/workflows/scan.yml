@@ -59,6 +59,7 @@ jobs:
       snyk_enabled: ${{ steps.config.outputs.snyk_enabled }}
       semgrep_enabled: ${{ steps.config.outputs.semgrep_enabled }}
       apis_enabled: ${{ steps.config.outputs.apis_enabled }}
+      project_key: ${{ steps.config.outputs.project_key }}
     steps:
       - name: Checkout w/Blueprint
         uses: cloudopsworks/blueprints/cd/checkout@v5
