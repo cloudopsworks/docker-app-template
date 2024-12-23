@@ -58,6 +58,8 @@ jobs:
       container_enabled: ${{ steps.config.outputs.container_enabled }}
       project_key: ${{ steps.config.outputs.project_key }}
       project_owner: ${{ steps.config.outputs.project_owner }}
+      environment: ${{ steps.config.outputs.environment }}
+      has_qualifier: ${{ steps.config.outputs.has_qualifier }}
     steps:
       - name: Checkout w/Blueprint
         uses: cloudopsworks/blueprints/cd/checkout@v5
@@ -117,8 +119,10 @@ jobs:
       - deploy-container
     runs-on: ubuntu-latest
     if: |
+      always() &&
       (needs.code-build.result == 'success') &&
-      (needs.code-build.outputs.is_release == 'true')
+      (needs.code-build.outputs.is_release == 'true') &&
+      (needs.code-build.outputs.has_qualifier != 'true')
     steps:
       - name: Checkout w/Blueprint
         uses: cloudopsworks/blueprints/cd/checkout@v5
@@ -142,13 +146,17 @@ jobs:
     needs:
       - code-build
       - deploy-container
-    if: needs.code-build.result == 'success'
+    if: |
+      always() && 
+      (needs.code-build.result == 'success')
     uses: ./.github/workflows/scan.yml
     with:
       deployment_name: ${{ needs.code-build.outputs.deployment_name }}
       bot_user: ${{ vars.BOT_USER }}
       sonarqube_url: ${{ vars.SONARQUBE_URL }}
       dtrack_url: ${{ vars.DEPENDENCYTRACK_URL }}
+      default_runner_set: ${{ vars.DEPLOYMENT_RUNNER_SET }}
+      environment: ${{ needs.code-build.outputs.environment }}
     secrets:
       token: ${{ secrets.BOT_TOKEN }}
       sonarqube_token: ${{ secrets.SONARQUBE_TOKEN }}
@@ -161,6 +169,7 @@ jobs:
       - code-build
       - deploy-container
     if: |
+      always() &&
       needs.code-build.result == 'success' &&
       needs.code-build.outputs.deployment_enabled == 'true' && 
       needs.code-build.outputs.is_library != 'true'
