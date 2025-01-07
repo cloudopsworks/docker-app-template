@@ -8,17 +8,34 @@ on:
   workflow_call:
     inputs:
       deployment_name:
+        description: 'Deployment Name'
         required: true
         type: string
       bot_user:
+        description: 'Bot User'
         required: true
         type: string
       sonarqube_url:
+        description: 'SonarQube URL'
         required: true
         type: string
       dtrack_url:
+        description: 'Dependency Track URL'
         required: true
         type: string
+      default_runner_set:
+        description: 'Default Runner Set'
+        required: true
+        type: string
+      environment:
+        description: 'Environment'
+        required: true
+        type: string
+      is_preview:
+        description: 'Is Preview Environment'
+        required: false
+        type: boolean
+        default: false
 
     secrets:
       token:
@@ -60,6 +77,8 @@ jobs:
       semgrep_enabled: ${{ steps.config.outputs.semgrep_enabled }}
       apis_enabled: ${{ steps.config.outputs.apis_enabled }}
       project_key: ${{ steps.config.outputs.project_key }}
+      runner_set: ${{ steps.config.outputs.runner_set != '' && steps.config.outputs.runner_set || inputs.default_runner_set  }}
+      fail_on_quality_gate: ${{ steps.config.outputs.fail_on_quality_gate }}
     steps:
       - name: Checkout w/Blueprint
         uses: cloudopsworks/blueprints/cd/checkout@v5
@@ -69,6 +88,33 @@ jobs:
       - name: Pipeline Configuration
         id: config
         uses: ./bp/ci/scan/config
+
+  scan-semgrep:
+    name: Scan Code with semgrep
+    needs:
+      - preload
+    runs-on: ubuntu-20.04
+    container:
+      image: semgrep/semgrep
+    env:
+      SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_TOKEN }}
+    steps:
+      - name: Checkout w/Blueprint
+        uses: cloudopsworks/blueprints/cd/checkout@v5
+        id: co
+        with:
+          blueprint_ref: 'v5'
+
+      - name: Semgrep Scan
+        if: ${{ needs.preload.outputs.semgrep_enabled == 'true' }}
+        uses: ./bp/ci/java/scan/semgrep
+        continue-on-error: true
+        with:
+          source_path: ${{ steps.co.outputs.source_path }}
+          semgrep_token: ${{ secrets.semgrep_token }}
+          bot_user: ${{ inputs.bot_user }}
+          token: ${{ secrets.token }}
+
 
   scan-others:
     name: Scan Containers
