@@ -109,7 +109,7 @@ jobs:
           source_path: ${{ steps.co.outputs.source_path }}
           snyk_token: ${{ secrets.snyk_token }}
           bot_user: ${{ inputs.bot_user }}
-	  token: ${{ secrets.token }}
+          token: ${{ secrets.token }}
 
       - name: Upload Artifacts
         uses: ./bp/ci/docker/test/artifacts
