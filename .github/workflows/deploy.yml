@@ -8,39 +8,57 @@ on:
   workflow_call:
     inputs:
       deployment_name:
+        description: 'Deployment Name'
         required: true
         type: string
       cloud:
+        description: 'Cloud Provider'
         required: true
         type: string
       cloud_type:
+        description: 'Cloud Type: kubernetes/eks/beanstalk/function etc.'
         required: true
         type: string
       runner_set:
+        description: 'Runner Set'
         required: true
         type: string
       default_aws_region:
+        description: 'Default AWS Region'
         required: false
         type: string
         default: ''
       default_aws_sts_role_arn:
+        description: 'Default AWS STS Role ARN'
         required: false
         type: string
         default: ''
       terraform_state_conf:
+        description: 'Terraform State Configuration'
         required: true
         type: string
       semver:
+        description: 'Semver Version'
         required: true
         type: string
       default_azure_rg:
+        description: 'Default Azure Resource Group'
         required: false
         type: string
         default: ''
       apis_enabled:
+        description: 'API Gateway Enabled'
         required: false
         type: boolean
         default: false
+      observability_enabled:
+        description: 'Observability Enabled'
+        required: true
+        type: boolean
+      observability_agent:
+        description: 'Observability Agent'
+        required: true
+        type: string
     secrets:
       token:
         description: 'GitHub Token'
@@ -90,6 +108,8 @@ jobs:
           project_key: ${{ steps.config.outputs.project_key }}
           deployment_name: ${{ inputs.deployment_name }}
           environment: ${{ steps.config.outputs.environment }}
+          observability_enabled: ${{ inputs.observability_enabled }}
+          observability_agent: ${{ inputs.observability_agent }}
 
       - name: Deploy Azure
         if: ${{ inputs.cloud == 'AZURE' }}
@@ -106,6 +126,8 @@ jobs:
           project_key: ${{ steps.config.outputs.project_key }}
           deployment_name: ${{ inputs.deployment_name }}
           environment: ${{ steps.config.outputs.environment }}
+          observability_enabled: ${{ inputs.observability_enabled }}
+          observability_agent: ${{ inputs.observability_agent }}
 
 #      - name: Deploy GCP
 #        if: ${{ inputs.cloud == 'GCP' }}
@@ -120,3 +142,5 @@ jobs:
 #          project_key: ${{ steps.config.outputs.project_key }}
 #          deployment_name: ${{ inputs.deployment_name }}
 #          environment: ${{ steps.config.outputs.environment }}
+#          observability_enabled: ${{ inputs.observability_enabled }}
+#          observability_agent: ${{ inputs.observability_agent }}

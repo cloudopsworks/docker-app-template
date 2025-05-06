@@ -52,7 +52,10 @@ jobs:
   code-build:
     name: 'Code Build - Branch: ${{ github.ref_name }}'
     runs-on: ubuntu-latest
-    if: ${{ ! startsWith(github.head_ref, 'release/') && ! startsWith(github.head_ref,'support/') && ! startsWith(github.head_ref,'master')}}
+    if: |
+      (! startsWith(github.head_ref, 'release/')) &&
+      (! startsWith(github.head_ref,'support/')) &&
+      (! startsWith(github.head_ref,'master'))
     outputs:
       is_release: ${{ steps.config.outputs.is_release }}
       is_pre_release: ${{ steps.config.outputs.is_pre_release }}
@@ -70,6 +73,7 @@ jobs:
       has_preview: ${{ steps.config.outputs.has_preview }}
       project_key: ${{ steps.config.outputs.project_key }}
       project_owner: ${{ steps.config.outputs.project_owner }}
+      environment: ${{ steps.config.outputs.environment }}
     steps:
       - name: Checkout w/Blueprint
         uses: cloudopsworks/blueprints/cd/checkout@v5
@@ -156,6 +160,7 @@ jobs:
           release_name: ${{ steps.config.outputs.release_name }}
           release_version: ${{ needs.code-build.outputs.semver }}
           project_key: ${{ steps.config.outputs.project_key }}
+          project_owner: ${{ steps.config.outputs.project_owner }}
           deployment_name: ${{ steps.config.outputs.deployment_name }}
           environment: ${{ steps.config.outputs.environment }}
           container_registry: ${{ vars.PREVIEW_DOCKER_REGISTRY_ADDRESS }}
@@ -212,6 +217,9 @@ jobs:
       bot_user: ${{ vars.BOT_USER }}
       sonarqube_url: ${{ vars.SONARQUBE_URL }}
       dtrack_url: ${{ vars.DEPENDENCYTRACK_URL }}
+      default_runner_set: ${{ vars.DEPLOYMENT_RUNNER_SET }}
+      environment: ${{ needs.code-build.outputs.environment }}
+      is_preview: true
     secrets:
       token: ${{ secrets.BOT_TOKEN }}
       sonarqube_token: ${{ secrets.SONARQUBE_TOKEN }}

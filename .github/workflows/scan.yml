@@ -8,17 +8,34 @@ on:
   workflow_call:
     inputs:
       deployment_name:
+        description: 'Deployment Name'
         required: true
         type: string
       bot_user:
+        description: 'Bot User'
         required: true
         type: string
       sonarqube_url:
+        description: 'SonarQube URL'
         required: true
         type: string
       dtrack_url:
+        description: 'Dependency Track URL'
         required: true
         type: string
+      default_runner_set:
+        description: 'Default Runner Set'
+        required: true
+        type: string
+      environment:
+        description: 'Environment'
+        required: true
+        type: string
+      is_preview:
+        description: 'Is Preview Environment'
+        required: false
+        type: boolean
+        default: false
 
     secrets:
       token:
@@ -60,6 +77,8 @@ jobs:
       semgrep_enabled: ${{ steps.config.outputs.semgrep_enabled }}
       apis_enabled: ${{ steps.config.outputs.apis_enabled }}
       project_key: ${{ steps.config.outputs.project_key }}
+      runner_set: ${{ steps.config.outputs.runner_set != '' && steps.config.outputs.runner_set || inputs.default_runner_set  }}
+      fail_on_quality_gate: ${{ steps.config.outputs.fail_on_quality_gate }}
     steps:
       - name: Checkout w/Blueprint
         uses: cloudopsworks/blueprints/cd/checkout@v5
@@ -74,7 +93,7 @@ jobs:
     name: Scan Containers
     needs:
       - preload
-    runs-on: ubuntu-latest
+    runs-on: ${{ needs.preload.outputs.runner_set }}
     steps:
       - name: Checkout w/Blueprint
         uses: cloudopsworks/blueprints/cd/checkout@v5
@@ -90,11 +109,11 @@ jobs:
           source_path: ${{ steps.co.outputs.source_path }}
           snyk_token: ${{ secrets.snyk_token }}
           bot_user: ${{ inputs.bot_user }}
-          token: ${{ inputs.token }}
+	  token: ${{ secrets.token }}
 
       - name: Upload Artifacts
         uses: ./bp/ci/docker/test/artifacts
         with:
           bot_user: ${{ inputs.bot_user }}
-          token: ${{ inputs.token }}
+          token: ${{ secrets.token }}
 
