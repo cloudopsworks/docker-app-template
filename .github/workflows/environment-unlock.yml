@@ -24,14 +24,6 @@ on:
         type: string
         description: Lock ID for the environment
         required: true
-      target:
-        type: choice
-        description: What to Unlock?
-        required: true
-        default: app
-        options:
-          - app
-          - api
       qualifier:
         type: string
         description: Qualifier for the lock (green/bluee)
@@ -86,26 +78,8 @@ jobs:
       - name: Install runner tools
         uses: ./bp/ci/common/install/runner-tools
 
-      - name: Unlock API AWS
-        if: ${{ needs.preload.outputs.cloud == 'AWS' && inputs.target == 'api' }}
-        uses: ./bp/cd/deploy/api/aws
-        with:
-          unlock: true
-          lock_id: ${{ inputs.lockId }}
-          token: ${{ secrets.token }}
-          aws_region: ${{ needs.preload.outputs.aws_region != '' && needs.preload.outputs.aws_region || vars.DEPLOYMENT_AWS_REGION }}
-          aws_sts_role_arn: ${{ needs.preload.outputs.deploy_aws_sts_role_arn != '' && needs.preload.outputs.deploy_aws_sts_role_arn || vars.DEPLOYMENT_AWS_STS_ROLE_ARN }}
-          aws_access_key_id: ${{ secrets.DEPLOYMENT_AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.DEPLOYMENT_AWS_SECRET_ACCESS_KEY }}
-          terraform_state_conf: ${{ vars.DEPLOYMENT_STATE_CONF }}
-          release_name: ${{ needs.preload.outputs.release_name }}
-          release_version: 'v1'
-          project_key: ${{ needs.preload.outputs.project_key }}
-          deployment_name: ${{ inputs.unlockDeploymentName }}
-          environment: ${{ inputs.environment }}
-
       - name: Unlock Application Deploy AWS
-        if: ${{ needs.preload.outputs.cloud == 'AWS' && inputs.target == 'app' }}
+        if: ${{ needs.preload.outputs.cloud == 'AWS' }}
         uses: ./bp/cd/deploy/app/aws
         with:
           unlock: true
@@ -124,25 +98,8 @@ jobs:
           deployment_name: ${{ inputs.unlockDeploymentName }}
           environment: ${{ inputs.environment }}
 
-      - name: Unlock API Azure
-        if: ${{ needs.preload.outputs.cloud == 'AZURE' && inputs.target == 'api' }}
-        uses: ./bp/cd/deploy/api/azure
-        with:
-          unlock: true
-          lock_id: ${{ inputs.lockId }}
-          token: ${{ secrets.token }}
-          azure_service_id: ${{ secrets.DEPLOYMENT_AZURE_SERVICE_ID }}
-          azure_service_secret: ${{ secrets.DEPLOYMENT_AZURE_SERVICE_SECRET }}
-          azure_rg: ${{ needs.preload.outputs.azure_rg != '' && needs.preload.outputs.azure_rg || vars.DEPLOYMENT_AZURE_RG }}
-          terraform_state_conf: ${{ vars.DEPLOYMENT_STATE_CONF }}
-          release_name: ${{ needs.preload.outputs.release_name }}
-          release_version: 'v1'
-          project_key: ${{ needs.preload.outputs.project_key }}
-          deployment_name: ${{ inputs.unlockDeploymentName }}
-          environment: ${{ inputs.environment }}
-
       - name: Unlock Application Deploy Azure
-        if: ${{ needs.preload.outputs.cloud == 'AZURE' && inputs.target == 'app' }}
+        if: ${{ needs.preload.outputs.cloud == 'AZURE' }}
         uses: ./bp/cd/deploy/app/azure
         with:
           unlock: true
