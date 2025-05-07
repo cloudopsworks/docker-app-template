@@ -6,6 +6,37 @@ repository_owner: "REPO_OWNER" # Required
 ## Default image version is "node:18-alpine" and default run command is npm run start
 ## modify docker_image and docker_inline parameters to match the proper configuration needed
 #docker_image: docker/image:version-xxx
+# Set Snyk processing to true if want to enable, the tool is disabled by default
+#snyk:
+#  enabled: true
+#
+# Set Semgrep processing to true if want to enable, the tool is disabled by default
+#semgrep:
+#  enabled: true
+#
+# Set Sonarqube processing to true if want to enable, the tool is disabled by default
+#sonarqube:
+#  enabled: true
+#  fail_on_quality_gate: true
+#  sources_path: "/"
+#  libraries_path: "**/node_modules/**/*"
+#  tests_path: "/"
+#  tests_inclusions: "**/test/**/*"
+#  tests_libraries: "**/node_modules/**/*"
+#  exclusions: "**/node_modules/**/*,"**/test/**/*"
+#  extra_exclusions:
+#  branch_disabled: true # uncomment only if you are using Community Sonarqube
+#
+# Set DependencyTrack processing to false if want to disable, the tool is enabled by default
+# type: is one of => Library , Application , Container , Framework , Device , Firmware , File , Operating System
+#       Default type is Application
+#dependencyTrack:
+#  enabled: true
+#  type: Application
+#
+# Set Trivy processing to true if want to enable, the tool is disabled by default
+#trivy:
+#  enabled: true
 #
 # Dockerfile Inline content that will be merged into the Dockerfile
 #docker_inline: |
@@ -31,6 +62,43 @@ repository_owner: "REPO_OWNER" # Required
 #custom_usergroup: |
 #  groupadd --gid $GROUP_ID --system $GROUP_NAME \
 #    && useradd --uid $USER_ID --system --gid $GROUP_ID --home /app/webapp $USER_NAME
+#
+# Observability configuration: if enabled will deploy observability tools to the environment
+#observability:
+#  enabled: true
+#  agent: xray | newrelic | datadog | dynatrace (optional: defaults to xray)
+#  config:
+#    # XRAY agent Configuration
+#    configFilePath: /app/xray
+#    configFileName: xray-config.json
+#    contextMissingStrategy: LOG_ERROR
+#    tracingEnabled: "true"
+#    samplingStrategy: CENTRAL | LOCAL | NONE | ALL
+#    traceIdInjectionPrefix: ""
+#    samplingRulesManifest: "path-to-sampling-rules-manifest"
+#    awsServiceHandlerManifest: "path-to-aws-service-handler-manifest"
+#    awsSdkVersion: 1 | 2
+#    maxStackTraceLength: 50
+#    streamingThreshold: 100
+#    traceIdInjection: "true"
+#    pluginsEnabled: "true"
+#    collectSqlQueries: "false"
+#    contextPropagation: "true"
+#    # DataDog agent Configuration
+#    tags: tag1=value1,tag2=value2
+#    logs_enabled: "true"
+#    logs_config_container_collect_all: "true"
+#    container_exclude_logs: "name:datadog-agent"
+#    trace_debug: "false"
+#    logs_injection: "true"
+#    profiling_enabled: "true"
+#    trace_sample_rate: 1.0
+#    trace_sampling_rules: "path-to-sampling-rules"
+#    apm_non_local_traffic: "true"
+#    apm_enabled: "true"
+#    dogstatsd_non_local_traffic: "true"
+#    http_client_error_statuses: "400,401,403,404,405,409,410,429,500,501,502,503,504,505"
+#    http_server_error_statuses: "500,501,502,503,504,505"
 #
 ## CD pipeline configuration uncomment and configure accordingly to enable
 # Target Cloud

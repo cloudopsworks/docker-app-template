@@ -120,7 +120,7 @@ jobs:
     name: Scan Containers
     needs:
       - preload
-    runs-on: ubuntu-latest
+    runs-on: ${{ needs.preload.outputs.runner_set }}
     steps:
       - name: Checkout w/Blueprint
         uses: cloudopsworks/blueprints/cd/checkout@v5
@@ -136,11 +136,11 @@ jobs:
           source_path: ${{ steps.co.outputs.source_path }}
           snyk_token: ${{ secrets.snyk_token }}
           bot_user: ${{ inputs.bot_user }}
-          token: ${{ inputs.token }}
+          token: ${{ secrets.token }}
 
       - name: Upload Artifacts
         uses: ./bp/ci/docker/test/artifacts
         with:
           bot_user: ${{ inputs.bot_user }}
-          token: ${{ inputs.token }}
+          token: ${{ secrets.token }}
 
