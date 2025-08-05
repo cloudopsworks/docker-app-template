@@ -1,7 +1,10 @@
 ##
-# (c) 2024 - Cloud Ops Works LLC - https://cloudops.works/
-#            On GitHub: https://github.com/cloudopsworks
-#            Distributed Under Apache v2.0 License
+# (c) 2021-2025
+#     Cloud Ops Works LLC - https://cloudops.works/
+#     Find us on:
+#       GitHub: https://github.com/cloudopsworks
+#       WebSite: https://cloudops.works
+#     Distributed Under Apache v2.0 License
 #
 name: Release Build
 on:
@@ -64,9 +67,9 @@ jobs:
       observability_agent: ${{ steps.config.outputs.observability_agent }}
     steps:
       - name: Checkout w/Blueprint
-        uses: cloudopsworks/blueprints/cd/checkout@v5
+        uses: cloudopsworks/blueprints/cd/checkout@v5.9
         with:
-          blueprint_ref: 'v5.8'
+          blueprint_ref: 'v5.9'
 
       - name: Pipeline Configuration
         id: config
@@ -97,6 +100,8 @@ jobs:
   deploy-container:
     needs:
       - code-build
+    if: |
+      (needs.code-build.outputs.deployment_enabled == 'true')
     uses: ./.github/workflows/deploy-container.yml
     with:
       deployment_name: ${{ needs.code-build.outputs.deployment_name }}
@@ -123,16 +128,16 @@ jobs:
       - deploy-container
     runs-on: ubuntu-latest
     if: |
-      always() &&
+      (! cancelled()) &&
       (needs.code-build.result == 'success') &&
       (needs.code-build.outputs.is_release == 'true') &&
       (needs.code-build.outputs.has_qualifier != 'true')
     steps:
       - name: Checkout w/Blueprint
-        uses: cloudopsworks/blueprints/cd/checkout@v5
+        uses: cloudopsworks/blueprints/cd/checkout@v5.9
         id: co
         with:
-          blueprint_ref: 'v5.8'
+          blueprint_ref: 'v5.9'
 
       - name: Perform Release
         uses: ./bp/cd/release
@@ -151,7 +156,7 @@ jobs:
       - code-build
       - deploy-container
     if: |
-      always() && 
+      (! cancelled()) && 
       (needs.code-build.result == 'success')
     uses: ./.github/workflows/scan.yml
     with:
@@ -173,7 +178,7 @@ jobs:
       - code-build
       - deploy-container
     if: |
-      always() &&
+      (! cancelled()) &&
       (needs.code-build.result == 'success') &&
       (needs.code-build.outputs.deployment_enabled == 'true') && 
       (needs.code-build.outputs.is_library != 'true')
