@@ -19,10 +19,12 @@ on:
       - develop
       - support/**
       - release/**
-    paths-ignore:
-      - '.github/**'
-      - '!.github/vars/**'
-      - '!.github/values/**'
+    paths:
+      - '**'
+      - '.cloudopsworks/vars/**'
+      - '.cloudopsworks/values/**'
+      - '!.github/**'
+      - '!.cloudopsworks/*'
   workflow_dispatch:
 
 concurrency: build-${{ github.repository }}-${{ github.ref }}
@@ -67,9 +69,9 @@ jobs:
       observability_agent: ${{ steps.config.outputs.observability_agent }}
     steps:
       - name: Checkout w/Blueprint
-        uses: cloudopsworks/blueprints/cd/checkout@v5.9
+        uses: cloudopsworks/blueprints/cd/checkout@v5.10
         with:
-          blueprint_ref: 'v5.9'
+          blueprint_ref: 'v5.10'
 
       - name: Pipeline Configuration
         id: config
@@ -86,10 +88,8 @@ jobs:
         uses: ./bp/ci/docker/container
         with:
           semver: ${{ steps.build.outputs.semver }}
-          node_version: ${{ steps.build.outputs.node_version }}
-          node_dist: ${{ steps.build.outputs.node_dist }}
-          node_image_variant: ${{ steps.build.outputs.node_image_variant }}
           environment: ${{ steps.config.outputs.environment }}
+          package_name: ${{ steps.build.outputs.package_name }}
           is_release: ${{ steps.config.outputs.is_release }}
           default_registry_address: ${{ vars.DOCKER_REGISTRY_ADDRESS }}
           project_key: ${{ steps.config.outputs.project_key }}
@@ -110,8 +110,11 @@ jobs:
       runner_set: ${{ needs.code-build.outputs.runner_set }}
       default_aws_region: ${{ vars.BUILD_AWS_REGION }}
       default_aws_sts_role_arn: ${{ vars.BUILD_AWS_STS_ROLE_ARN }}
-      default_azure_rg: ${{ vars.BUILD_AZURE_RG }}
+      default_azure_rg: ${{ vars.BUILD_AZURE_RESOURCE_GROUP }}
       default_registry_address: ${{ vars.DOCKER_REGISTRY_ADDRESS }}
+      default_gcp_project: ${{ vars.BUILD_GCP_PROJECT }}
+      default_gcp_region: ${{ vars.BUILD_GCP_REGION }}
+      default_gcp_impersonate_sa: ${{ vars.BUILD_GCP_IMPERSONATE_SA }}
       project_key: ${{ needs.code-build.outputs.project_key }}
       project_owner: ${{ needs.code-build.outputs.project_owner }}
     secrets:
@@ -120,6 +123,7 @@ jobs:
       aws_secret_access_key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
       azure_service_id: ${{ secrets.BUILD_AZURE_SERVICE_ID }}
       azure_service_secret: ${{ secrets.BUILD_AZURE_SERVICE_SECRET }}
+      gcp_credentials: ${{ secrets.BUILD_GCP_CREDENTIALS }}
 
   release:
     name: 'Generate Release'
@@ -134,10 +138,10 @@ jobs:
       (needs.code-build.outputs.has_qualifier != 'true')
     steps:
       - name: Checkout w/Blueprint
-        uses: cloudopsworks/blueprints/cd/checkout@v5.9
+        uses: cloudopsworks/blueprints/cd/checkout@v5.10
         id: co
         with:
-          blueprint_ref: 'v5.9'
+          blueprint_ref: 'v5.10'
 
       - name: Perform Release
         uses: ./bp/cd/release
@@ -161,6 +165,7 @@ jobs:
     uses: ./.github/workflows/scan.yml
     with:
       deployment_name: ${{ needs.code-build.outputs.deployment_name }}
+      semver: ${{ needs.code-build.outputs.semver }}
       bot_user: ${{ vars.BOT_USER }}
       sonarqube_url: ${{ vars.SONARQUBE_URL }}
       dtrack_url: ${{ vars.DEPENDENCYTRACK_URL }}
@@ -190,7 +195,10 @@ jobs:
       runner_set: ${{ needs.code-build.outputs.runner_set }}
       default_aws_region: ${{ vars.DEPLOYMENT_AWS_REGION }}
       default_aws_sts_role_arn: ${{ vars.DEPLOYMENT_AWS_STS_ROLE_ARN }}
-      default_azure_rg: ${{ vars.DEPLOYMENT_AZURE_RG }}
+      default_gcp_impersonate_sa: ${{ vars.DEPLOYMENT_GCP_IMPERSONATE_SA }}
+      default_gcp_project: ${{ vars.DEPLOYMENT_GCP_PROJECT }}
+      default_gcp_region: ${{ vars.DEPLOYMENT_GCP_REGION }}
+      default_azure_rg: ${{ vars.DEPLOYMENT_AZURE_RESOURCE_GROUP }}
       terraform_state_conf: ${{ vars.DEPLOYMENT_STATE_CONF }}
       semver: ${{ needs.code-build.outputs.semver }}
       apis_enabled: ${{ needs.code-build.outputs.apis_enabled == 'true' }}
@@ -202,3 +210,4 @@ jobs:
       aws_secret_access_key: ${{ secrets.DEPLOYMENT_AWS_SECRET_ACCESS_KEY }}
       azure_service_id: ${{ secrets.DEPLOYMENT_AZURE_SERVICE_ID }}
       azure_service_secret: ${{ secrets.DEPLOYMENT_AZURE_SERVICE_SECRET }}
+      gcp_credentials: ${{ secrets.DEPLOYMENT_GCP_CREDENTIALS }}
