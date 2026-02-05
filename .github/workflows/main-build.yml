@@ -89,6 +89,7 @@ jobs:
         with:
           semver: ${{ steps.build.outputs.semver }}
           environment: ${{ steps.config.outputs.environment }}
+          package_name: ${{ steps.build.outputs.package_name }}
           is_release: ${{ steps.config.outputs.is_release }}
           default_registry_address: ${{ vars.DOCKER_REGISTRY_ADDRESS }}
           project_key: ${{ steps.config.outputs.project_key }}
