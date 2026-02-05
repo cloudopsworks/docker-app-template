@@ -95,7 +95,7 @@ typings/
 hs_err_pid*
 # Serverless directories
 .serverless/
-.DS_Store
+**/.DS_Store
 
 # IntelliJ idea
 .idea/
@@ -111,5 +111,6 @@ hs_err_pid*
 .vscode/
 
 ### Tronador ###
-tronador/
+.tronador*.mk
 .tronador
+tronador/
