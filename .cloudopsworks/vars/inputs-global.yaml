@@ -40,6 +40,9 @@ repository_owner: "REPO_OWNER" # Required
 #  enabled: true
 #  type: Application
 #
+# Set if this is a library project
+#is_library: true
+#
 # Set Trivy processing to true if want to enable, the tool is disabled by default
 #trivy:
 #  enabled: true
