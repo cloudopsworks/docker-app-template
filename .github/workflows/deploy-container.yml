@@ -106,3 +106,4 @@ jobs:
           default_registry_address: ${{ inputs.default_registry_address }}
           project_key: ${{ inputs.project_key }}
           project_owner: ${{ inputs.project_owner }}
+          token: ${{ inputs.token }}
