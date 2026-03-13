@@ -61,7 +61,6 @@ on:
         description: 'Dependency Track Token'
         required: true
 
-
 concurrency: scan-${{ github.repository }}-${{ github.ref }}
 
 permissions:
@@ -71,6 +70,7 @@ permissions:
   pull-requests: write
   issues: write
   checks: write
+  security-events: write
 
 jobs:
   preload:
