@@ -87,6 +87,7 @@ jobs:
       runner_set: ${{ steps.config.outputs.runner_set != '' && steps.config.outputs.runner_set || inputs.default_runner_set  }}
       fail_on_quality_gate: ${{ steps.config.outputs.fail_on_quality_gate }}
       quality_gate_enabled: ${{ steps.config.outputs.quality_gate_enabled }}
+      trivy_enabled: ${{ steps.config.outputs.trivy_enabled }}
     steps:
       - name: Checkout w/Blueprint
         uses: cloudopsworks/blueprints/cd/checkout@v5.10
