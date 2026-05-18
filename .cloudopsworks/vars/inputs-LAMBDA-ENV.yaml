@@ -1,5 +1,7 @@
+# This file contains the input variables for the Lambda environment.
+# Agents: cloud=aws ; cloud_type=lambda
 environment: "dev|uat|prod|demo"
-runner_set: "RUNNER-ENV"
+#runner_set: "RUNNER-ENV" # Optional: when using self-hosted runners
 #disable_deploy: true
 versions_bucket: "VERSIONS_BUCKET"
 #logs_bucket: "LOGS_BUCKET"
