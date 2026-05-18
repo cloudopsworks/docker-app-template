@@ -1,6 +1,6 @@
 # This file contains the environment variables for the Kubernetes deployment
 environment: "dev|uat|prod|demo"
-runner_set: "RUNNER-ENV"
+#runner_set: "RUNNER-ENV" # Optional: when using self-hosted runners
 #disable_deploy: true
 container_registry: REGISTRY
 cluster_name: CLUSTER_NAME
