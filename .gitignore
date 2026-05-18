@@ -114,3 +114,11 @@ hs_err_pid*
 .tronador*.mk
 .tronador
 tronador/
+
+### AI Agents ###
+.claude/
+.gstack/
+.opencode/
+.omc/
+.omx/
+.ai/
