@@ -1,36 +1,11 @@
 ##
-# (c) 2021-2025
+# (c) 2021-2026
 #     Cloud Ops Works LLC - https://cloudops.works/
 #     Find us on:
 #       GitHub: https://github.com/cloudopsworks
 #       WebSite: https://cloudops.works
 #     Distributed Under Apache v2.0 License
 #
-zipGlobs:
-  - node_modules/**
-  - ./**
-  - .env
-excludeGlobs:
-  - Dockerfile
-  - .helmignore
-  - .dockerignore
-  - .git*
-  - .git/
-  - OWNER*
-  - README.md
-  - jenkins*
-  - target/*
-  - charts/*
-  - cloudopsworks-ci*
-  - skafold*
-  - gulpfile*
-  - tronador/*
-  - .tronador
-  - Makefile
-  - apifiles/*
-  - .nyc_output/*
-  - coverage/*
-  - bom.xml
 
 # Repo & CD Configurations
 # Some of them previously managed in OWNERS file
