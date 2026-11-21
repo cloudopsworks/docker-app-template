@@ -2,8 +2,8 @@
 
 ## Agent command policy
 
-The `Makefile` remains for compatibility, but direct Make invocation is deprecated
-for README and Git-flow/version operations. Agents must use the Tronador CLI:
+Use Tronador CLI (`tronador-cli`, installed as `tronador`) directly for project initialization, README generation,
+branch management, and versioning. Do not invoke Makefile targets for these tasks.
 
 - Run `tronador readme build` to render README output. If committed target/dependency
   documentation also needs refresh, run `tronador docs targets` first.
@@ -48,7 +48,6 @@ Use this template when you want a repository that already includes:
 ### Application scaffold
 - `package.json` — package metadata, name, and semver version (managed by `tronador project init --allow-network`)
 - `apifiles/` — API definition placeholders and samples
-- `Makefile` — version helper and bootstrap targets powered by Tronador
 
 ### Delivery scaffold
 - `.cloudopsworks/cloudopsworks-ci.yaml` — repository governance and deployment routing
@@ -105,6 +104,13 @@ Set these in `.cloudopsworks/vars/inputs-global.yaml` before the first pipeline 
 - `cloud_type` — deployment mechanism matching the target
 - Optional: `docker_image`, `docker_inline`, `docker_args`, `custom_run_command`
 - Optional: `snyk`, `semgrep`, `trivy`, `sonarqube` — security tooling
+
+**Artifact packaging:** The Docker workflow builds a container image and does not use
+`zipGlobs` or `excludeGlobs`; remove them from `.cloudopsworks/cloudopsworks-ci.yaml`.
+If you add a language-specific artifact packaging step, put any extra include patterns
+(`zipGlobs`) or exclude patterns (`excludeGlobs`) in `.cloudopsworks/vars/inputs-global.yaml`.
+Both lists are optional: they are merged with, not substituted for, the selected language's
+defaults in `cloudopsworks/blueprints/artifacts/config/<lang>.yaml`.
 
 ---
 
@@ -241,7 +247,7 @@ these commands — never fetch or apply template changes manually.
 4. Commit the result with: `chore: upgrade from <template-name> <old-version> → <new-version> +semver: patch`
 5. Use `/cw-release` to create and merge the hotfix PR (see [Release Workflow — use `cw-release`](#release-workflow--use-cw-release)).
 
-> **Note:** `Makefile`, `.github/`, `.cloudopsworks/labeler.yml`, `.cloudopsworks/Makefile`,
+> **Note:** `Makefile`, `.github/`, `.cloudopsworks/labeler.yml`,
 > and `.cloudopsworks/LICENSE` are owned by the template and will be overwritten on every upgrade.
 > Do not edit these files manually in derived repositories.
 
